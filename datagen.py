@@ -38,21 +38,19 @@ def datagen(num_values):
 
 
 def studentidgen(num):
-    studentIDs.clear()
-    from random import randint
-    for i in range(num):
-        id = randint(10000, 10000+num*2)
-        while id in studentIDs:
-            id = randint(10000,10000+num*2)
-        studentIDs.append(id)
-    return studentIDs
+    global studentIDs
+    from random import shuffle
+    studentIDs = list(range(10000, 10000+num*2))
+    shuffle(studentIDs)
+    return studentIDs[:num]
 
 
 # In[18]:
 
 
 def gendergen(num):
-    genders.clear()
+    global genders
+    genders = []
     from random import random
 
     for i in range(num):
@@ -69,8 +67,9 @@ def gendergen(num):
 
 
 def agegen(num):
+    global ages
     from random import randint
-    ages.clear()
+    ages = []
     for i in range(num):
         age = randint(6, 18)
         ages.append(age)
@@ -81,8 +80,9 @@ def agegen(num):
 
 
 def credgen(num):
+    global creds
     from random import randint
-    creds.clear()
+    creds = []
     for i in range(num):
         cred = randint(0, 3)
         if cred == 0:
@@ -101,8 +101,9 @@ def credgen(num):
 
 
 def csizegen(num):
+    global csizes
     import numpy as np
-    csizes.clear()
+    csizes = []
     for i in np.random.normal(30, 5, num):
         csizes.append(int(i))
     return csizes
@@ -110,16 +111,18 @@ def csizegen(num):
 
 # In[25]:
 def disabilitygen(num):
+    global disability
     from random import randint
-    disability.clear()
+    disability = []
     for i in range(num):
         d = randint(0, len(possibled)-1)
         disability.append(possibled[d])
     return disability
 
 def accomgen(num):
+    global accoms
     from random import randint
-    accoms.clear()
+    accoms = []
     for i in range(num):
         a = randint(0, len(possiblea)-1)
         accoms.append(possiblea[a])
@@ -127,8 +130,11 @@ def accomgen(num):
 
 def gpagen(num):
 #     negative impact for bigger classroom sizes 
-    gpas.clear()
+    global gpas
+    gpas = []
     from random import random
+    from sklearn.preprocessing import scale
+    from numpy import clip
     for i in range(num):
         class_size_contrib = -0.5*((csizes[i]-20)/10)
         if creds[i] == "Associate's":
@@ -148,12 +154,9 @@ def gpagen(num):
         else:
             gendage_contrib = 0.6
         da_contrib = (-1*abs(possibled.index(disability[i]) - possiblea.index(accoms[i]))+3)*0.5
-        gpa = class_size_contrib + gendage_contrib + cred_contrib + da_contrib + random()-0.5
-        if gpa > 4:
-            gpa = 4
-        elif gpa < -4:
-            gpa = -4
+        gpa = class_size_contrib + gendage_contrib + cred_contrib + da_contrib + random()*2
         gpas.append(gpa)
+    gpas = clip((scale(gpas)*1)+0.4, -4, 4)
     return gpas
 
 
